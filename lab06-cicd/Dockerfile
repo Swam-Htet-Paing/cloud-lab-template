@@ -10,6 +10,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY src ./src
+# The runtime only needs `node`. Remove npm/npx/corepack, whose bundled
+# dependencies (e.g. tar) are what Trivy flags in the base image.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 ARG GIT_SHA=unknown
 ENV GIT_SHA=${GIT_SHA}
 USER node
