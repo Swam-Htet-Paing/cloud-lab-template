@@ -176,12 +176,13 @@ jobs:
           IMAGE_REF: ${{ needs.package.outputs.image }}:${{ github.sha }}
         run: |
           set -euo pipefail
-          HTTP_CODE=$(curl --silent --show-error --output /dev/null \
+          HTTP_CODE=$(curl --silent --show-error --output /tmp/hook_body.txt \
             --write-out "%{http_code}" --max-time 30 \
             --retry 3 --retry-delay 5 \
             --get --data-urlencode "imgURL=${IMAGE_REF}" \
             "${RENDER_DEPLOY_HOOK_URL}")
           echo "Deploy hook HTTP status: ${HTTP_CODE}"
+          echo "Deploy hook response body:"; cat /tmp/hook_body.txt; echo
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
             echo "::error title=Deploy hook rejected::HTTP ${HTTP_CODE}"
             exit 1
